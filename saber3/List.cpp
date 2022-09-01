@@ -99,11 +99,11 @@ void List::Deserialize (FILE* file){
   while (countNode-- > 0 || !feof(file)){
       NodePointer node(new ListNode);
 
-//      char nodeOldPoint[sizeOfStringForPointerSize];
-//      fgets(nodeOldPoint, sizeOfStringForPointerSize, file);
-//      oldAndNewNodePoiners[nodeOldPoint] = node;
-      char* nodeOldPoint;
-      fscanf(file, "%p", &nodeOldPoint);
+      char nodeOldPoint[sizeOfStringForPointerSize];
+      fgets(nodeOldPoint, sizeOfStringForPointerSize, file);
+      oldAndNewNodePoiners[nodeOldPoint] = node;
+//      char* nodeOldPoint;
+//      fscanf(file, "%p", &nodeOldPoint);
 
       puts(nodeOldPoint);
 
@@ -114,7 +114,7 @@ void List::Deserialize (FILE* file){
       fgets(nodeData, nodeDataSize, file);
       node->data.assign(nodeData, nodeDataSize);
 
-      if (int isNodeHasRand = fgetc(file); isNodeHasRand == 'Y'){
+      if (fgetc(file) == 'Y'){
           char randOldPoint[sizeOfStringForPointerSize];
           fgets(randOldPoint, sizeOfStringForPointerSize, file);
           RestoreRandInNodes(randOldPoint, node);
