@@ -16,39 +16,34 @@ void List::PushBack(const std::string& str){
 
 
 void List::PushBack(NodePointer node){
-  if (_count == 1){
-      _tail = node;
-      _head->next = _tail;
-      _tail->prev = _head;
-      _tail->next = nullptr;
-      _tail->rand = _tail;
-      ++_count;
-
-      return;
-    }
-
   if (_count){
-      node->prev = _tail;
-      node->next = nullptr;
-      node->rand = _tail; //megaPseudoRand
-      _tail->next = node;
-      _tail = node;
+      node->prev = _tail->prev;
+      node->next = _tail;
+      node->rand = node->prev; //megaPseudoRand
+      _tail->prev->next = node;
+      _tail->prev = node;
       ++_count;
 
       return;
     }
 
   _head = node;
+  _head->prev = nullptr;
   _head->rand = _head;
+  _tail = std::make_shared<ListNode>();
+  _tail->prev = _head;
+  _head->next = _tail;
   ++_count;
 }
 
 void List::Print(){
-  NodePointer next = _head;
+  NodePointer currNode = _head;
 
-  while (next != _tail){
-      std::cout << next->data << "-" << next->rand->data << std::endl;
-      next = next->next;
+  while (currNode != _tail){
+      std::cout << currNode->data << "-";
+      if (currNode->rand) std::cout << currNode->rand->data;
+      std::cout << std::endl;
+      currNode = currNode->next;
     }
 }
 
@@ -67,7 +62,7 @@ void List::Serialize(FILE* file){
 
       if (node->rand){
           fputs("Y", file);
-          fprintf(file, "%p", &*(node->rand));
+          fprintf(file, "%p ", &*(node->rand));
         }else{
           fputs("N", file);
         }
@@ -94,33 +89,28 @@ void List::Deserialize (FILE* file){
 
   size_t countNode = 0;
   fscanf(file, _formatForSize_t, &countNode);
-  int sizeOfStringForPointerSize = sizeof(void**) *2; //2 char for hex byte
 
-  while (countNode-- > 0 || !feof(file)){
+  while (countNode-- != 0){
       NodePointer node(new ListNode);
 
-      char nodeOldPoint[sizeOfStringForPointerSize];
-      fgets(nodeOldPoint, sizeOfStringForPointerSize, file);
+      void* nodeOldPointRaw;
+      fscanf(file, "%p", &nodeOldPointRaw);
+      char nodeOldPoint[20];
+      sprintf(nodeOldPoint, "%p", nodeOldPointRaw);
       oldAndNewNodePoiners[nodeOldPoint] = node;
-//      char* nodeOldPoint;
-//      fscanf(file, "%p", &nodeOldPoint);
-
-      puts(nodeOldPoint);
 
       size_t nodeDataSize = 0;
       fscanf(file, _formatForSize_t, &nodeDataSize);
-
       char* nodeData = new char(nodeDataSize);
       fgets(nodeData, nodeDataSize, file);
       node->data.assign(nodeData, nodeDataSize);
+      PushBack(node);
 
       if (fgetc(file) == 'Y'){
-          char randOldPoint[sizeOfStringForPointerSize];
-          fgets(randOldPoint, sizeOfStringForPointerSize, file);
-          RestoreRandInNodes(randOldPoint, node);
+          fscanf(file, "%p ", &nodeOldPointRaw);
+          sprintf(nodeOldPoint, "%p", nodeOldPointRaw);
+          RestoreRandInNodes(nodeOldPoint, node);
         }
-
-      PushBack(node);
     }
 
   for(const auto& [oldRand, node]: nodesWaitingRandNode){

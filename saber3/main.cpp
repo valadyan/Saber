@@ -6,11 +6,11 @@ int main()
 
   list.PushBack("afsdf");
   list.PushBack("af");
-  list.PushBack("");
+  list.PushBack("nnnnnnnnnnnnnnnnnnn");
   list.PushBack("afsdf33333");
   list.PushBack("afsdf");
   list.PushBack("afsdfds");
-//  list.Print();
+  list.Print();
 
 //  return 0;
 
@@ -18,15 +18,15 @@ int main()
 
   FILE* file = fopen(path, "wb");
   if (file){
-    list.Serialize(file);
+      list.Serialize(file);
     }
 
   fclose(file);
 
   List list2;
-  file = fopen(path, "rb");
+  /*FILE**/ file = fopen(path, "rb");
   if (file){
-    list2.Deserialize(file);
+      list2.Deserialize(file);
     }
 
   fclose(file);
